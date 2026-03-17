@@ -179,6 +179,7 @@ class WORKER(object):
             resume = False if self.RUN.freezeD > -1 else True
             wandb.init(project=self.RUN.project,
                        entity=self.RUN.entity,
+                       group=self.RUN.group,
                        name=self.run_name,
                        dir=self.RUN.save_dir,
                        resume=self.best_step > 0 and resume)

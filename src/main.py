@@ -29,6 +29,7 @@ def load_configs_initialize_training():
     parser = ArgumentParser(add_help=True)
     parser.add_argument("--entity", type=str, default=None, help="entity for wandb logging")
     parser.add_argument("--project", type=str, default=None, help="project name for wandb logging")
+    parser.add_argument("--group", type=str, default=None, help="group name for wandb logging")
 
     parser.add_argument("-cfg", "--cfg_file", type=str, default="./src/configs/CIFAR10/ContraGAN.yaml")
     parser.add_argument("-data", "--data_dir", type=str, default=None)
