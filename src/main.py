@@ -39,7 +39,7 @@ def load_configs_initialize_training():
 
     parser.add_argument("--seed", type=int, default=-1, help="seed for generating random numbers")
     parser.add_argument("-DDP", "--distributed_data_parallel", action="store_true")
-    parser.add_argument("--backend", type=str, default="nccl", help="cuda backend for DDP training \in ['nccl', 'gloo']")
+    parser.add_argument("--backend", type=str, default="nccl", help="cuda backend for DDP training in ['nccl', 'gloo']")
     parser.add_argument("-tn", "--total_nodes", default=1, type=int, help="total number of nodes for training")
     parser.add_argument("-cn", "--current_node", default=0, type=int, help="rank of the current node")
     parser.add_argument("--num_workers", type=int, default=8)
@@ -64,7 +64,7 @@ def load_configs_initialize_training():
     parser.add_argument("-lgv", "--langevin_sampling", action="store_true",
                         help="apply langevin sampling to generate images from a Energy-Based Model")
     parser.add_argument("-lgv_rate", "--langevin_rate", type=float, default=-1,
-                        help="an initial update rate for langevin sampling (\epsilon)")
+                        help="an initial update rate for langevin sampling (epsilon)")
     parser.add_argument("-lgv_std", "--langevin_noise_std", type=float, default=-1,
                         help="standard deviation of a gaussian noise used in langevin sampling (std of n_i)")
     parser.add_argument("-lgv_decay", "--langevin_decay", type=float, default=-1,
