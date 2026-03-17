@@ -253,7 +253,8 @@ class WORKER(object):
                         is_stylegan=self.is_stylegan,
                         style_mixing_p=self.cfgs.STYLEGAN.style_mixing_p,
                         stylegan_update_emas=True,
-                        cal_trsp_cost=True if self.LOSS.apply_lo else False)
+                        cal_trsp_cost=True if self.LOSS.apply_lo else False,
+                        class_probs=cfgs.DATA.class_probs)
 
                     # if LOSS.apply_r1_reg is True,
                     # let real images require gradient calculation to compute \derv_{x}Dis(x)
@@ -536,7 +537,8 @@ class WORKER(object):
                         is_stylegan=self.is_stylegan,
                         style_mixing_p=self.cfgs.STYLEGAN.style_mixing_p,
                         stylegan_update_emas=False,
-                        cal_trsp_cost=True if self.LOSS.apply_lo else False)
+                        cal_trsp_cost=True if self.LOSS.apply_lo else False,
+                        class_probs=cfgs.DATA.class_probs)
 
                     # blur images for stylegan3-r
                     if self.MODEL.backbone == "stylegan3" and self.STYLEGAN.stylegan3_cfg == "stylegan3-r" and self.blur_init_sigma != "N/A":
@@ -657,7 +659,8 @@ class WORKER(object):
                         is_stylegan=self.is_stylegan,
                         style_mixing_p=self.cfgs.STYLEGAN.style_mixing_p,
                         stylegan_update_emas=False,
-                        cal_trsp_cost=True if self.LOSS.apply_lo else False)
+                        cal_trsp_cost=True if self.LOSS.apply_lo else False,
+                        class_probs=cfgs.DATA.class_probs)
 
                     # blur images for stylegan3-r
                     if self.MODEL.backbone == "stylegan3" and self.STYLEGAN.stylegan3_cfg == "stylegan3-r" and self.blur_init_sigma != "N/A":
@@ -785,7 +788,8 @@ class WORKER(object):
                                                                        generator_synthesis=generator_synthesis,
                                                                        style_mixing_p=0.0,
                                                                        stylegan_update_emas=False,
-                                                                       cal_trsp_cost=False)
+                                                                       cal_trsp_cost=False,
+                                                                       class_probs=cfgs.DATA.class_probs)
 
         misc.plot_img_canvas(images=fake_images.detach().cpu(),
                              save_path=join(self.RUN.save_dir,
@@ -1095,7 +1099,8 @@ class WORKER(object):
                                                                         generator_synthesis=generator_synthesis,
                                                                         style_mixing_p=0.0,
                                                                         stylegan_update_emas=False,
-                                                                        cal_trsp_cost=False)
+                                                                        cal_trsp_cost=False,
+                                                                        class_probs=cfgs.DATA.class_probs)
                 fake_anchor = torch.unsqueeze(fake_images[0], dim=0)
                 fake_anchor = ops.quantize_images(fake_anchor)
                 fake_anchor = ops.resize_images(fake_anchor, resizer, totensor, mean, std, self.local_rank)
@@ -1237,7 +1242,8 @@ class WORKER(object):
                                                                           generator_synthesis=generator_synthesis,
                                                                           style_mixing_p=0.0,
                                                                           stylegan_update_emas=False,
-                                                                          cal_trsp_cost=False)
+                                                                          cal_trsp_cost=False,
+                                                                          class_probs=cfgs.DATA.class_probs)
                 fake_images = fake_images.detach().cpu().numpy()
 
                 real_images = np.asarray((real_images + 1) * 127.5, np.uint8)
@@ -1335,7 +1341,8 @@ class WORKER(object):
                                                                            generator_synthesis=generator_synthesis,
                                                                            style_mixing_p=0.0,
                                                                            stylegan_update_emas=False,
-                                                                           cal_trsp_cost=False)
+                                                                           cal_trsp_cost=False,
+                                                                           class_probs=cfgs.DATA.class_probs)
 
                 fake_dict = self.Dis(fake_images, fake_labels)
                 if i == 0:
@@ -1585,7 +1592,8 @@ class WORKER(object):
                                                                      generator_synthesis=generator_synthesis,
                                                                      style_mixing_p=0.0,
                                                                      stylegan_update_emas=False,
-                                                                     cal_trsp_cost=False)
+                                                                     cal_trsp_cost=False,
+                                                                     class_probs=cfgs.DATA.class_probs)
                 else:
                     images, labels = images.to(self.local_rank), labels.to(self.local_rank)
 
@@ -1649,7 +1657,8 @@ class WORKER(object):
                                                                  generator_synthesis=generator_synthesis,
                                                                  style_mixing_p=0.0,
                                                                  stylegan_update_emas=False,
-                                                                 cal_trsp_cost=False)
+                                                                 cal_trsp_cost=False,
+                                                                 class_probs=cfgs.DATA.class_probs)
             else:
                 images, labels = images.to(self.local_rank), labels.to(self.local_rank)
 

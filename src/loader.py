@@ -12,6 +12,7 @@ import os
 import random
 import warnings
 
+import numpy as np
 from torch.backends import cudnn
 from torch.utils.data import DataLoader
 from torch.nn import DataParallel
@@ -154,6 +155,16 @@ def load_worker(local_rank, cfgs, gpus_per_node, run_name, hdf5_path):
             logger.info("Eval dataset size: {dataset_size}".format(dataset_size=len(eval_dataset)))
     else:
         eval_dataset = None
+
+    dataset = train_dataset or eval_dataset
+    labels = dataset.labels if hasattr(dataset, "labels") else dataset.targets
+    labels = np.array(labels)
+
+    class_counts = np.bincount(labels, minlength=cfgs.DATA.num_classes)
+    assert class_counts.shape[0] == cfgs.DATA.num_classes
+    class_probs = class_counts / class_counts.sum()
+
+    cfgs.DATA.class_probs = class_probs
 
     # -----------------------------------------------------------------------------
     # define a distributed sampler for DDP train and evaluation.

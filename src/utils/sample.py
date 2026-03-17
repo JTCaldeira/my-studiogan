@@ -40,9 +40,13 @@ def sample_normal(batch_size, z_dim, truncation_factor, device):
     return latents
 
 
-def sample_y(y_sampler, batch_size, num_classes, device):
+def sample_y(y_sampler, batch_size, num_classes, device, class_probs=None):
     if y_sampler == "totally_random":
-        y_fake = torch.randint(low=0, high=num_classes, size=(batch_size, ), dtype=torch.long, device=device)
+        if class_probs is not None:
+            probs = torch.tensor(class_probs, dtype=torch.float, device=device)
+            y_fake = torch.multinomial(probs, batch_size, replacement=True)
+        else:
+            y_fake = torch.randint(low=0, high=num_classes, size=(batch_size,), dtype=torch.long, device=device)
 
     elif y_sampler == "acending_some":
         assert batch_size % 8 == 0, "The size of batches should be a multiple of 8."
@@ -66,8 +70,8 @@ def sample_y(y_sampler, batch_size, num_classes, device):
     return y_fake
 
 
-def sample_zy(z_prior, batch_size, z_dim, num_classes, truncation_factor, y_sampler, radius, device):
-    fake_labels = sample_y(y_sampler=y_sampler, batch_size=batch_size, num_classes=num_classes, device=device)
+def sample_zy(z_prior, batch_size, z_dim, num_classes, truncation_factor, y_sampler, radius, device, class_probs=None):
+    fake_labels = sample_y(y_sampler=y_sampler, batch_size=batch_size, num_classes=num_classes, device=device, class_probs=class_probs)
     batch_size = fake_labels.shape[0]
 
     if z_prior == "gaussian":
@@ -89,7 +93,7 @@ def sample_zy(z_prior, batch_size, z_dim, num_classes, truncation_factor, y_samp
 
 def generate_images(z_prior, truncation_factor, batch_size, z_dim, num_classes, y_sampler, radius, generator, discriminator,
                     is_train, LOSS, RUN, MODEL, device, is_stylegan, generator_mapping, generator_synthesis, style_mixing_p,
-                    stylegan_update_emas, cal_trsp_cost):
+                    stylegan_update_emas, cal_trsp_cost, class_probs=None):
     if is_train:
         truncation_factor = -1.0
         lo_steps = LOSS.lo_steps4train
@@ -109,7 +113,8 @@ def generate_images(z_prior, truncation_factor, batch_size, z_dim, num_classes, 
                                         truncation_factor=-1 if is_stylegan else truncation_factor,
                                         y_sampler=y_sampler,
                                         radius=radius,
-                                        device=device)
+                                        device=device,
+                                        class_probs=class_probs)
     batch_size = fake_labels.shape[0]
     info_discrete_c, info_conti_c = None, None
     if MODEL.info_type in ["discrete", "both"]:
