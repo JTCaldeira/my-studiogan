@@ -32,12 +32,15 @@ import utils.resize as resize
 
 model_versions = {"InceptionV3_torch": "pytorch/vision:v0.10.0",
                   "ResNet_torch": "pytorch/vision:v0.10.0",
-                  "SwAV_torch": "facebookresearch/swav:main"}
+                  "SwAV_torch": "facebookresearch/swav:main",
+                  "CLIP": "clip-vit_b32.pkl",}
 model_names = {"InceptionV3_torch": "inception_v3",
                "ResNet50_torch": "resnet50",
-               "SwAV_torch": "resnet50"}
+               "SwAV_torch": "resnet50",
+               "CLIP": "clip-vit_b32.pkl",}
 SWAV_CLASSIFIER_URL = "https://dl.fbaipublicfiles.com/deepcluster/swav_800ep_eval_linear.pth.tar"
 SWIN_URL = "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window7_224_22kto1k.pth"
+CLIP_URL = "models/clip-vit_b32.pkl"
 
 
 class LoadEvalModel(object):
@@ -51,7 +54,7 @@ class LoadEvalModel(object):
         if self.eval_backbone == "InceptionV3_tf":
             self.res, mean, std = 299, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5]
             self.model = InceptionV3(resize_input=False, normalize_input=False).to(self.device)
-        elif self.eval_backbone in ["InceptionV3_torch", "ResNet50_torch", "SwAV_torch"]:
+        elif self.eval_backbone in ["InceptionV3_torch", "ResNet50_torch", "SwAV_torch", "CLIP"]:
             self.res = 299 if "InceptionV3" in self.eval_backbone else 224
             mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
             self.model = torch.hub.load(model_versions[self.eval_backbone],
@@ -109,7 +112,7 @@ class LoadEvalModel(object):
 
         if self.eval_backbone in ["InceptionV3_tf", "DINO_torch", "Swin-T_torch"]:
             repres, logits = self.model(x)
-        elif self.eval_backbone in ["InceptionV3_torch", "ResNet50_torch", "SwAV_torch"]:
+        elif self.eval_backbone in ["InceptionV3_torch", "ResNet50_torch", "SwAV_torch", "CLIP"]:
             logits = self.model(x)
             if len(self.save_output.outputs) > 1:
                 repres = []
