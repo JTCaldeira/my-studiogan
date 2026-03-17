@@ -290,10 +290,10 @@ def load_worker(local_rank, cfgs, gpus_per_node, run_name, hdf5_path):
     # load a pre-trained network (InceptionV3, SwAV, DINO, or Swin-T)
     # -----------------------------------------------------------------------------
     if cfgs.DATA.name in ["ImageNet", "Baby_ImageNet", "Papa_ImageNet", "Grandpa_ImageNet"]:
-        num_eval = {"train": 50000, "valid": len(eval_dataloader.dataset)}
+        num_eval = {"train": 50000, "valid": 50000}
     else:
         if eval_dataloader is not None:
-            num_eval[cfgs.RUN.ref_dataset] = len(eval_dataloader.dataset)
+            num_eval[cfgs.RUN.ref_dataset] = 50000
         else:
             num_eval["train"], num_eval["valid"], num_eval["test"] = 50000, 50000, 50000
 
