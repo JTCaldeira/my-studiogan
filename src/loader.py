@@ -157,7 +157,7 @@ def load_worker(local_rank, cfgs, gpus_per_node, run_name, hdf5_path):
         eval_dataset = None
 
     dataset = train_dataset or eval_dataset
-    labels = dataset.labels if hasattr(dataset, "labels") else dataset.targets
+    labels = dataset.data.labels if hasattr(dataset.data, "labels") else dataset.data.targets
     labels = np.array(labels)
 
     class_counts = np.bincount(labels, minlength=cfgs.DATA.num_classes)
