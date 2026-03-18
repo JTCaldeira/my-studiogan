@@ -33,14 +33,13 @@ import utils.resize as resize
 model_versions = {"InceptionV3_torch": "pytorch/vision:v0.10.0",
                   "ResNet_torch": "pytorch/vision:v0.10.0",
                   "SwAV_torch": "facebookresearch/swav:main",
-                  "CLIP": "clip-vit_b32.pkl",}
+                  "CLIP": "openai/CLIP",}
 model_names = {"InceptionV3_torch": "inception_v3",
                "ResNet50_torch": "resnet50",
                "SwAV_torch": "resnet50",
-               "CLIP": "clip-vit_b32.pkl",}
+               "CLIP": "ViT_B_32",}
 SWAV_CLASSIFIER_URL = "https://dl.fbaipublicfiles.com/deepcluster/swav_800ep_eval_linear.pth.tar"
 SWIN_URL = "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window7_224_22kto1k.pth"
-CLIP_URL = "models/clip-vit_b32.pkl"
 
 
 class LoadEvalModel(object):
@@ -58,8 +57,10 @@ class LoadEvalModel(object):
             self.res = 299 if "InceptionV3" in self.eval_backbone else 224
             mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
             self.model = torch.hub.load(model_versions[self.eval_backbone],
-                                        model_names[self.eval_backbone],
-                                        pretrained=True)
+                                        model_names[self.eval_backbone])
+            if isinstance(self.model, tuple):
+                # CLIP returns a 2-tuple with the model and a transforms.Compose
+                self.model = self.model[0]
             if self.eval_backbone == "SwAV_torch":
                 linear_state_dict = load_state_dict_from_url(SWAV_CLASSIFIER_URL, progress=True)["state_dict"]
                 linear_state_dict = {k.replace("module.linear.", ""): v for k, v in linear_state_dict.items()}
@@ -113,14 +114,19 @@ class LoadEvalModel(object):
         if self.eval_backbone in ["InceptionV3_tf", "DINO_torch", "Swin-T_torch"]:
             repres, logits = self.model(x)
         elif self.eval_backbone in ["InceptionV3_torch", "ResNet50_torch", "SwAV_torch", "CLIP"]:
-            logits = self.model(x)
-            if len(self.save_output.outputs) > 1:
-                repres = []
-                for rank in range(len(self.save_output.outputs)):
-                    repres.append(self.save_output.outputs[rank][0].detach().cpu())
-                repres = torch.cat(repres, dim=0).to(self.device)
+            if self.eval_backbone == "CLIP":
+                # CLIP does not give logits
+                logits = torch.zeros(x.shape[0], 1)
+                repres = self.model.encode_image(x)
             else:
-                repres = self.save_output.outputs[0][0].to(self.device)
+                logits = self.model(x)
+                if len(self.save_output.outputs) > 1:
+                    repres = []
+                    for rank in range(len(self.save_output.outputs)):
+                        repres.append(self.save_output.outputs[rank][0].detach().cpu())
+                    repres = torch.cat(repres, dim=0).to(self.device)
+                else:
+                    repres = self.save_output.outputs[0][0].to(self.device)
             self.save_output.clear()
         return repres, logits
 
